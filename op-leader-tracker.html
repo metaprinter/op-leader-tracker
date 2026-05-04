@@ -108,6 +108,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .empty{padding:60px 0;text-align:center;color:var(--muted);font-size:14px}
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:11px 18px;font-size:13px;color:var(--gold);opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;z-index:999}
 .toast.show{opacity:1;transform:none}
+.set-group.promo .set-header::before{background:linear-gradient(90deg,#E8272B,#2B7FCC,#F5C842,#a855f7);width:72px}
+.set-group.promo .set-title{background:linear-gradient(90deg,#E8272B,#F5C842,#2B7FCC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 /* Gaps panel */
 .gaps-panel{padding:10px 24px 0;max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 .gap-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:border-color .15s,background .15s;text-decoration:none;color:var(--text)}
@@ -356,6 +358,9 @@ const OP_SETS=[
     {id:'OP15-039',nm:'Rebecca',c:'Blue',img:''},
     {id:'OP15-058',nm:'Enel',c:'Purple',img:''},
     {id:'OP15-098',nm:'Monkey.D.Luffy',c:'Yellow',img:''},
+  ]},
+  {key:'PROMO',title:'Promo Leaders',sub:'P-L · Event & Special Promos',cards:[
+    {id:'P-001',nm:'Monkey.D.Luffy',c:['Red','Green','Blue','Purple','Black','Yellow'],img:''},
   ]},
   {key:'PRB01',title:'Premium Best',sub:'PRB-01',cards:[
     {id:'PRB01-001',nm:'Sanji',c:'Red',img:'https://limitlesstcg.nyc3.cdn.digitaloceanspaces.com/one-piece/PRB01/PRB01-001_EN.webp'},
@@ -659,11 +664,12 @@ function filtered(cards){
   return list;
 }
 
-function renderGapsPanel(boosterSets, starterSet) {
+function renderGapsPanel(boosterSets, starterSet, promoSet) {
   const panel = document.getElementById('gapsPanel');
   const chips = [];
   const allSets = [...boosterSets];
   if (starterSet && !stExcluded) allSets.push(starterSet);
+  if (promoSet) allSets.push(promoSet);
 
   let anyMissing = false;
   for (const grp of allSets) {
@@ -690,8 +696,9 @@ function render(){
   const main=document.getElementById('main');
   let tAll=0,tOwned=0,html='',any=false;
 
-  const boosterSets=SETS.filter(g=>g.key!=='STARTERS');
+  const boosterSets=SETS.filter(g=>g.key!=='STARTERS'&&g.key!=='PROMO');
   const starterSet=SETS.find(g=>g.key==='STARTERS');
+  const promoSet=SETS.find(g=>g.key==='PROMO');
 
   // Sort booster sets if sortMissing is active
   let orderedBooster = [...boosterSets];
@@ -707,7 +714,7 @@ function render(){
   }
 
   // Render gaps panel
-  renderGapsPanel(boosterSets, starterSet);
+  renderGapsPanel(boosterSets, starterSet, promoSet);
 
   for(const grp of orderedBooster){
     const cards=filtered(grp.cards);
@@ -755,6 +762,24 @@ function render(){
     }
   }
 
+  if(promoSet){
+    const prCards=filtered(promoSet.cards);
+    const showPr=curTab!=='owned'||(prCards.filter(c=>data[c.id]).length>0);
+    if(showPr||(curSearch&&prCards.length>0)){
+      any=true;
+      tAll+=promoSet.cards.length;tOwned+=promoSet.cards.filter(c=>data[c.id]).length;
+      const prOwned=prCards.filter(c=>data[c.id]).length;
+      const prPct=prCards.length?Math.round(prOwned/prCards.length*100):0;
+      html+=`<div class="set-group promo" id="set-PROMO">
+<div class="set-header">
+  <div><div class="set-title">${promoSet.title}</div><div class="set-sub">${promoSet.sub}</div></div>
+  <div class="set-progress"><div class="progress-track"><div class="progress-fill" style="width:${prPct}%"></div></div><div class="progress-pct">${prOwned}/${prCards.length}</div></div>
+</div>
+<div class="card-grid">${prCards.map(cardHTML).join('')}</div>
+</div>`;
+    }
+  }
+
   if(!any)html='<div class="empty">No leaders match.</div>';
   main.innerHTML=html;
   const overallPct=tAll?Math.round(tOwned/tAll*100):0;
@@ -788,7 +813,8 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
 }));
 document.getElementById('exportBtn').addEventListener('click',()=>{
   const rows=['Card ID	Name	Color	Set	Qty	Conditions'];
-  for(const grp of SETS)for(const c of grp.cards){
+  const allExportSets=[...SETS.filter(g=>g.key!=='STARTERS'&&g.key!=='PROMO'),SETS.find(g=>g.key==='STARTERS'),SETS.find(g=>g.key==='PROMO')].filter(Boolean);
+  for(const grp of allExportSets)for(const c of grp.cards){
     const d=data[c.id];
     const col=Array.isArray(c.c)?c.c.join('/'):(c.c||'');
     if(d)rows.push([c.id,c.nm,col,c.set||grp.key,d.qty,(d.conds||[]).join(',')].join('\t'));
