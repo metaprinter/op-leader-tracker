@@ -77,7 +77,6 @@ body { background:var(--bg); color:var(--text); font-family:'Bitter',Georgia,ser
 .bar-fill { height:100%; border-radius:2px; transition:width 0.6s ease; position:relative; }
 .bar-fill .bar-text { position:absolute; right:6px; top:50%; transform:translateY(-50%); font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--bg); font-weight:700; white-space:nowrap; }
 .bar-value { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-dim); width:90px; text-align:right; flex-shrink:0; }
-.timeline-svg, .scatter-svg { width:100%; }
 .legend { display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; }
 .legend-item { display:flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-dim); }
 .legend-dot { width:10px; height:10px; border-radius:50%; }
@@ -97,8 +96,6 @@ body { background:var(--bg); color:var(--text); font-family:'Bitter',Georgia,ser
 #data-grid { overflow-x:auto; }
 #data-grid table { min-width:1400px; }
 #data-grid td { padding:4px 6px; font-size:10px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-#data-grid td.editable { cursor:text; }
-#data-grid td.editable:hover { background:var(--surface2); outline:1px dashed var(--gold-dim); }
 #data-grid td input, #data-grid td select { font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--bg); color:var(--text); border:1px solid var(--gold-dim); padding:2px 4px; width:100%; border-radius:2px; }
 #data-grid .row-actions { white-space:nowrap; }
 #data-grid .row-actions button { font-family:'JetBrains Mono',monospace; font-size:9px; padding:2px 6px; border:1px solid var(--gold-dim); background:var(--surface); color:var(--text-dim); border-radius:2px; cursor:pointer; margin:0 1px; }
@@ -219,9 +216,6 @@ let dataPage = 0;
 let editIdx = -1;
 let saveTimeout = null;
 
-// ========== SEED DATA REMOVED — Use APPEND TSV to load initial data ==========
-const SEED_DATA = [];
-
 // ========== GOOGLE OAUTH ==========
 function handleAuth() {
   if (accessToken) { signOut(); return; }
@@ -313,9 +307,8 @@ async function loadFromDrive() {
     const fr = await driveRequest(`https://www.googleapis.com/drive/v3/files/${driveFileId}?alt=media`);
     DATA = await fr.json();
   } else {
-    // First time — seed with built-in data
-    DATA = JSON.parse(JSON.stringify(SEED_DATA));
-    await saveToDrive();
+    // First time — no data yet, user will APPEND TSV
+    DATA = [];
   }
   onDataLoaded();
 }
@@ -351,7 +344,7 @@ function debounceSave() {
 
 function loadLocal() {
   const stored = localStorage.getItem('carddass_data');
-  DATA = stored ? JSON.parse(stored) : JSON.parse(JSON.stringify(SEED_DATA));
+  DATA = stored ? JSON.parse(stored) : [];
   onDataLoaded();
 }
 
@@ -658,28 +651,14 @@ function detectListingType(type) {
 function normalizeChar(c) {
   if (!c) return '';
   const n = c.trim();
-  // Normalize casing
-  const map = {
-    'luffy':'Luffy','LUFFY':'Luffy','nami':'Nami','NAMI':'Nami','zoro':'Zoro','ZORO':'Zoro',
-    'hancock':'Hancock','HANCOCK':'Hancock','ace':'Ace','ACE':'Ace','shanks':'Shanks','SHANKS':'Shanks',
-    'sanji':'Sanji','SANJI':'Sanji','chopper':'Chopper','CHOPPER':'Chopper','robin':'Robin','ROBIN':'Robin',
-    'law':'Law','LAW':'Law','perona':'Perona','PERONA':'Perona','vivi':'Vivi','VIVI':'Vivi',
-    'usopp':'Usopp','USOPP':'Usopp','mihawk':'Mihawk','MIHAWK':'Mihawk','buggy':'Buggy','BUGGY':'Buggy',
-    'brook':'Brook','BROOK':'Brook','franky':'Franky','FRANKY':'Franky','smoker':'Smoker','SMOKER':'Smoker',
-    'crocodile':'Crocodile','CROCODILE':'Crocodile','dragon':'Dragon','DRAGON':'Dragon',
-    'doflamingo':'Doflamingo','DOFLAMINGO':'Doflamingo','shirahoshi':'Shirahoshi','SHIRAHOSHI':'Shirahoshi',
-    'brogy':'Brogy','BROGY':'Brogy',
-  };
-  return map[n] || map[n.toUpperCase()] || n.charAt(0).toUpperCase() + n.slice(1).toLowerCase();
+  if (!n) return '';
+  return n.charAt(0).toUpperCase() + n.slice(1).toLowerCase();
 }
 
 function normalizeGrader(g) {
   if (!g) return 'Raw';
   const u = g.trim().toUpperCase();
-  if (u === 'PSA' || u === 'Psa') return 'PSA';
-  if (u === 'CGC') return 'CGC';
-  if (u === 'BGS') return 'BGS';
-  if (u === 'ARS') return 'ARS';
+  if (['PSA','CGC','BGS','ARS'].includes(u)) return u;
   return g.trim() || 'Raw';
 }
 
