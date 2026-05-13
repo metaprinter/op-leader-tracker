@@ -98,6 +98,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .1s}
 .pill:hover{border-color:var(--border2);color:var(--text)}
 .pill.on{background:var(--red);border-color:var(--red);color:#fff}
+.grade-row{display:flex;flex-direction:column;gap:6px;margin-top:7px}
+.grade-label{font-size:12px;color:var(--muted)}
+.grade-pills{display:flex;flex-wrap:wrap;gap:3px}
+.grade-num-row{margin-top:4px;display:flex;flex-wrap:wrap;gap:3px}
 .remove-btn{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:500;color:var(--muted);cursor:pointer;background:transparent;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-family:'DM Sans',sans-serif;transition:all .15s;width:100%;justify-content:center}
 .remove-btn:hover{color:var(--red);border-color:var(--red);background:var(--red-dim)}
 .set-group.excluded .card-grid{filter:grayscale(1);opacity:0.35;pointer-events:none}
@@ -835,6 +839,15 @@ function render(){
 <div class="cond-pills">
 ${['NM','LP','MP','HP','D'].map(cnd=>`<span class="pill${(d.cond||[]).includes(cnd)?' on':''}" data-id="${c.id}" data-cond="${cnd}">${cnd}</span>`).join('')}
 </div>
+<div class="grade-row">
+<span class="grade-label">Grade</span>
+<div class="grade-pills">
+${['RAW','CGC','PSA','BGS'].map(gr=>`<span class="pill${(d.grader||'RAW')===gr?' on':''}" data-id="${c.id}" data-grader="${gr}">${gr}</span>`).join('')}
+</div>
+${(d.grader&&d.grader!=='RAW')?`<div class="grade-num-row">
+${['6','7','8','8.5','9','9.5','10'].map(gn=>`<span class="pill${(d.grade||'')==gn?' on':''}" data-id="${c.id}" data-grade="${gn}">${gn}</span>`).join('')}
+</div>`:''}
+</div>
 <button class="remove-btn" data-id="${c.id}">Remove</button>
 </div>
 </div>
@@ -874,11 +887,30 @@ ${['NM','LP','MP','HP','D'].map(cnd=>`<span class="pill${(d.cond||[]).includes(c
       e.stopPropagation();
       const id=pill.dataset.id;
       const cnd=pill.dataset.cond;
-      if(!data[id])data[id]={qty:1,cond:[]};
-      if(!data[id].cond)data[id].cond=[];
-      const idx=data[id].cond.indexOf(cnd);
-      if(idx>-1)data[id].cond.splice(idx,1);
-      else data[id].cond.push(cnd);
+      const grader=pill.dataset.grader;
+      const grade=pill.dataset.grade;
+      
+      if(!data[id])data[id]={qty:1,cond:[],grader:'RAW'};
+      
+      // Condition pill (multi-select)
+      if(cnd){
+        if(!data[id].cond)data[id].cond=[];
+        const idx=data[id].cond.indexOf(cnd);
+        if(idx>-1)data[id].cond.splice(idx,1);
+        else data[id].cond.push(cnd);
+      }
+      
+      // Grader pill (single-select)
+      if(grader){
+        data[id].grader=grader;
+        if(grader==='RAW')delete data[id].grade; // Clear grade if switching to RAW
+      }
+      
+      // Grade number pill (single-select)
+      if(grade){
+        data[id].grade=grade;
+      }
+      
       scheduleSave();
       render();
     };
@@ -951,13 +983,15 @@ document.getElementById('sortMissingBtn').onclick=()=>{
 };
 
 document.getElementById('exportBtn').onclick=()=>{
-  const rows=[['Card ID','Card Name','Set','Rarity','Qty','Condition','Notes'].join('\t')];
+  const rows=[['Card ID','Card Name','Set','Rarity','Qty','Condition','Grader','Grade','Notes'].join('\t')];
   SETS.forEach(s=>{
     s.cards.forEach(c=>{
       const d=data[c.id];
       if(!d)return;
       const rarity=c.r==='h'?'Holo':c.r==='g'?'Gold':'Regular';
-      rows.push([c.id,c.nm,s.title,rarity,d.qty||1,(d.cond||[]).join(','),d.notes||''].join('\t'));
+      const grader=d.grader||'RAW';
+      const grade=d.grade||'';
+      rows.push([c.id,c.nm,s.title,rarity,d.qty||1,(d.cond||[]).join(','),grader,grade,d.notes||''].join('\t'));
     });
   });
   const blob=new Blob([rows.join('\n')],{type:'text/tab-separated-values'});
@@ -986,8 +1020,10 @@ document.getElementById('importFile').onchange=(e)=>{
       const id=parts[0].trim();
       const qty=parseInt(parts[4])||1;
       const cond=parts[5]?parts[5].split(',').map(c=>c.trim()).filter(c=>c):['NM'];
-      const notes=parts[6]||'';
-      data[id]={qty,cond,notes};
+      const grader=parts[6]?parts[6].trim():'RAW';
+      const grade=parts[7]?parts[7].trim():'';
+      const notes=parts[8]||'';
+      data[id]={qty,cond,grader,grade,notes};
     });
     scheduleSave();
     render();
