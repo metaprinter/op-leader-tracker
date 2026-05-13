@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP Carddass Tracker — Trubbish Bin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0e12;--surface:#13151c;--surface2:#1a1d27;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#eceef4;--muted:#636878;--muted2:#9196a8;
+  --red:#E8272B;--blue:#2B7FCC;--gold:#F5C842;
+  --red-dim:rgba(232,39,43,0.15);--gold-dim:rgba(245,200,66,0.12);
+  --green:#22c55e;
+  --radius:10px;--card-w:200px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.logo-wrap{cursor:pointer}
+.site-header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:14px;height:58px;position:sticky;top:0;z-index:100}
+.logo-wrap{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.logo-text{line-height:1}
+.logo-top{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:2px;color:var(--red);display:block}
+.logo-bot{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1.5px;color:var(--text);display:block}
+.logo-bot span{color:var(--blue)}
+.search-wrap{flex:1;max-width:300px;position:relative}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search-wrap input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px 7px 32px;outline:none;transition:border-color .15s}
+.search-wrap input::placeholder{color:var(--muted)}
+.search-wrap input:focus{border-color:var(--red)}
+.tabs{display:flex;gap:3px}
+.tab{font-size:12px;font-weight:500;padding:5px 13px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tab:hover{color:var(--text);border-color:var(--border2)}
+.tab.active{background:var(--red);border-color:var(--red);color:#fff}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.stat-badge{font-family:'DM Mono',monospace;font-size:12px;background:var(--gold-dim);border:1px solid rgba(245,200,66,0.25);border-radius:20px;padding:4px 12px;white-space:nowrap}
+.stat-badge strong{color:var(--gold)}
+.hdr-btn{font-size:12px;font-weight:500;padding:6px 13px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap}
+.hdr-btn:hover{color:var(--text);border-color:var(--text)}
+.hdr-btn.export:hover{color:var(--gold);border-color:var(--gold)}
+.hdr-btn.danger:hover{color:var(--red);border-color:var(--red)}
+.auth-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;gap:20px;text-align:center;padding:40px}
+.auth-logo{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:8px}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--text)}
+.auth-sub{font-size:14px;color:var(--muted);max-width:340px;line-height:1.6}
+.auth-btn{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:12px 22px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);transition:all .2s;margin-top:8px}
+.auth-btn:hover{border-color:var(--blue);background:rgba(43,127,204,.08)}
+.auth-btn svg{width:20px;height:20px;flex-shrink:0}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block;margin-right:4px;transition:background .3s}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite;}
+.sync-dot.saved{background:var(--green);}
+.sync-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sync-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.main{padding:28px 24px 80px;max-width:1440px;margin:0 auto}
+.set-group{margin-bottom:44px}
+.set-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--border);position:relative}
+.set-header::before{content:'';position:absolute;bottom:-2px;left:0;width:48px;height:2px;background:var(--red);border-radius:1px}
+.set-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--text)}
+.set-sub{font-size:11px;color:var(--muted);font-weight:400;letter-spacing:.5px;text-transform:uppercase}
+.set-progress{margin-left:auto;display:flex;align-items:center;gap:10px}
+.progress-track{width:90px;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:#27e899;border-radius:2px;transition:width .4s ease}
+.progress-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);white-space:nowrap;min-width:52px;text-align:right}
+.card-grid{display:grid;grid-template-columns:repeat(5,var(--card-w));gap:12px}
+.card{width:var(--card-w);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .12s,box-shadow .15s;position:relative}
+.card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.card.owned{border-color:rgba(232,39,43,.45);background:rgba(232,39,43,.04);cursor:default}
+.card.owned:hover{border-color:var(--red);box-shadow:0 8px 24px rgba(232,39,43,.15);transform:none}
+.card-img-wrap{width:100%;aspect-ratio:421/614;background:var(--surface2);overflow:hidden;position:relative}
+.card-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .25s}
+.card-img-wrap img.loading{opacity:0}
+.img-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-align:center;padding:10px}
+.img-ph-id{font-size:11px;font-weight:500;color:var(--muted2)}
+.owned-check{position:absolute;top:7px;right:7px;width:24px;height:24px;border-radius:50%;background:var(--red);border:2px solid var(--bg);display:none;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(232,39,43,.5)}
+.card.owned .owned-check{display:flex}
+.owned-check svg{width:12px;height:12px;color:#fff}
+.card-body{padding:10px 12px 12px}
+.card-meta{display:flex;align-items:center;gap:5px;margin-bottom:2px}
+.card-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);line-height:1}
+.rarity-tag{font-size:9px;font-weight:600;letter-spacing:.3px;padding:1px 5px;border-radius:3px;line-height:1}
+.rarity-tag.regular{background:rgba(145,150,168,.15);color:var(--muted2);border:1px solid rgba(145,150,168,.25)}
+.rarity-tag.holo{background:rgba(43,127,204,.15);color:var(--blue);border:1px solid rgba(43,127,204,.25)}
+.rarity-tag.gold{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.25)}
+.card-name{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-detail{display:none;border-top:1px solid var(--border);padding-top:8px;margin-top:6px}
+.card.owned .card-detail{display:block}
+.qty-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.qty-label{font-size:12px;color:var(--muted)}
+.qty-ctrl{display:flex;align-items:center;gap:5px}
+.qty-btn{width:26px;height:26px;border-radius:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:'DM Sans',sans-serif;transition:background .1s}
+.qty-btn:hover{background:var(--border2)}
+.qty-val{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;min-width:18px;text-align:center;color:var(--gold)}
+.cond-pills{display:flex;flex-wrap:wrap;gap:3px}
+.pill{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;border:1px solid var(--border);color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .1s}
+.pill:hover{border-color:var(--border2);color:var(--text)}
+.pill.on{background:var(--red);border-color:var(--red);color:#fff}
+.remove-btn{display:flex;align-items:center;gap:4px;margin-top:8px;font-size:10px;font-weight:500;color:var(--muted);cursor:pointer;background:transparent;border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-family:'DM Sans',sans-serif;transition:all .15s;width:100%;justify-content:center}
+.remove-btn:hover{color:var(--red);border-color:var(--red);background:var(--red-dim)}
+.set-group.excluded .card-grid{filter:grayscale(1);opacity:0.35;pointer-events:none}
+.set-group.excluded .card{cursor:default}
+.st-toggle{font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-family:'DM Mono',monospace;letter-spacing:.5px;transition:all .15s;white-space:nowrap;margin-left:10px}
+.st-toggle.excluded{background:var(--red-dim);border-color:var(--red);color:var(--red)}
+.st-toggle.included{background:rgba(39,232,153,.12);border-color:#27e899;color:#27e899}
+.empty{padding:60px 0;text-align:center;color:var(--muted);font-size:14px}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:11px 18px;font-size:13px;color:var(--gold);opacity:0;transform:translateY(8px);transition:all .2s;pointer-events:none;z-index:999}
+.toast.show{opacity:1;transform:none}
+.gaps-panel{padding:10px 24px 0;max-width:1440px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.gap-chip{display:inline-flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:'DM Mono',monospace;cursor:pointer;transition:border-color .15s,background .15s;text-decoration:none;color:var(--text)}
+.gap-chip:hover{border-color:var(--red);background:var(--red-dim)}
+.gap-chip .gap-label{color:var(--muted2)}
+.gap-chip .gap-count{color:var(--red);font-weight:600}
+.gap-chip.done{border-color:rgba(39,232,153,.3);cursor:default;opacity:0.55}
+.gap-chip.done .gap-count{color:#27e899}
+.gaps-panel-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.hdr-btn.sort-active{color:#27e899;border-color:#27e899;background:rgba(39,232,153,.08)}
+@media(max-width:1100px){.card-grid{grid-template-columns:repeat(4,var(--card-w))}}
+@media(max-width:880px){.card-grid{grid-template-columns:repeat(3,var(--card-w))}}
+@media(max-width:640px){:root{--card-w:150px}.card-grid{grid-template-columns:repeat(2,var(--card-w))}.site-header{padding:0 12px;gap:8px;height:54px}.tabs{display:none}.main{padding:18px 12px 60px}.stat-badge{display:none}}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="auth-screen">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMFSURBVHgB7ZdLaBNBGMf/s5vdJNu0aZq0TUwfqFgVwYMIevAgeFE8iAcRvHgQPHgRRAQR9OBBEDx4UARFBA+CIHgQPHjwIIgHQRA8eBBBEEFQRKxJ0yRNs49kd2Z2djdJ2yYm2Wz1UPzDj2FnZ+b7f9/Md2aXASWUUEIJJZRQQgkl/D8YLGDOnj1rNhqNR1EUwefzIRaLQVEUGAwGaJqmv1cUBYqiIJVKIZlMIhaLQVVVmM1mBAIBdHR0YGxsDCzHMRsbG7h27Rqi0SgcDgdYlkU6nYbJZALLsvB6vTCbzZAkCbIsY2trC4IgwOVyQVVVyLIMk8kEv9+P3t5ezM/Pw+VyQRAEMADQ3d0Nv98PVVVRKBSg6zpkWYbZbEY2m0UikYDNZkMqlYLL5YLP54MgCOA4DslkEpqmwWQygWVZpNNpPH36FM3Nzbpup9MJWZbB6rqO7u5ufPnyBaqqwuv1Ynp6WrdarVY8fPgQy8vLOHHiBMbHx9Ha2oqOjg4IggBd16FpGkRRRDabhcPhwNDQEMbHx7G6uoo7d+7AarUCAJiensbq6ioAwO12Y2BgAFevXgXDMAgEArh58ybS6TTevn2LQCCAzs5OvHv3Di6XC+Xl5Th06BBaWlrA8zwAYHBwEH6/HwAwMjKCc+fOQRAEyLKMqqoqDA8PY3FxEd3d3RAEAQaDATabDR6PBzzPg+M4nD59GkNDQ/D7/bBarWhsbMT9+/cRCoXw7t07AICu62hra8Pjx4/x/v17zM3Nwev16tdRFAXV1dW4fPky3rx5g8HBQZhMJrAsC5/Ph9raWhw/fhytra3weDzo6OiAx+NBJBIBx3FYW1vD0NAQTp06hZaWFjAcx+H06dNYWVnBp0+fMDs7C5PJhJqaGly5cgWbm5uora3F7OwsRkdHcfToUXAch2g0isnJSTx58gRerxcAUFVVhYsXL+LFixe4cOECHA4HWI7j0NLSgi9fvuDGjRtgWRaKosDr9aK2thY8z4PjOMRiMTx79gxzczMACPD5fGhsbATHcWBZFlarFeFwGG63GwBgtVpRVVWFqqoqMAB0TdMQi8UQDocBAHa7HXa7HSzLwmQygeM4cBwHg8EAQRDgdDohCAIYxn8BoigimUyC53kEg0EwHMeBZVkYjUb9P4FgMAiLxQKGZVmwbPHhbDYLjuNgNBr1/wS73Q6TyfSH/ycAAGBZFkajEXsMG4ZhQH9dQgkllFBCCf8UP2f2B3SJMjf+AAAAAElFTkSuQmCC" class="auth-logo" alt="Trubbish Bin">
+<div>
+<div class="auth-title">OP Carddass Tracker</div>
+<div class="auth-sub">Track your Hyper Battle collection (1999–2001). Sign in with Google to sync across devices.</div>
+</div>
+<button id="signInBtn" class="auth-btn">
+<svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+Sign in with Google
+</button>
+<div id="authError" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></div>
+</div>
+
+<!-- APP (shown after sign-in) -->
+<div id="app" style="display:none">
+
+<header class="site-header">
+<a href="https://metaprinter.github.io/trubbish-bin/" class="logo-wrap">
+<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMFSURBVHgB7ZdLaBNBGMf/s5vdJNu0aZq0TUwfqFgVwYMIevAgeFE8iAcRvHgQPHgRRAQR9OBBEDx4UARFBA+CIHgQPHjwIIgHQRA8eBBBEEFQRKxJ0yRNs49kd2Z2djdJ2yYm2Wz1UPzDj2FnZ+b7f9/Md2aXASWUUEIJJZRQQgkl/D8YLGDOnj1rNhqNR1EUwefzIRaLQVEUGAwGaJqmv1cUBYqiIJVKIZlMIhaLQVVVmM1mBAIBdHR0YGxsDCzHMRsbG7h27Rqi0SgcDgdYlkU6nYbJZALLsvB6vTCbzZAkCbIsY2trC4IgwOVyQVVVyLIMk8kEv9+P3t5ezM/Pw+VyQRAEMADQ3d0Nv98PVVVRKBSg6zpkWYbZbEY2m0UikYDNZkMqlYLL5YLP54MgCOA4DslkEpqmwWQygWVZpNNpPH36FM3Nzbpup9MJWZbB6rqO7u5ufPnyBaqqwuv1Ynp6WrdarVY8fPgQy8vLOHHiBMbHx9Ha2oqOjg4IggBd16FpGkRRRDabhcPhwNDQEMbHx7G6uoo7d+7AarUCAKampLCysrIKAJiehoqKBkxNTUFRFACAx+PBjRs3sLG+jpGRERw8eBBarRaxWAyyLMPpdKK+vh6nTp3CwsICRkdH4XK5AABjY2Po6+tDT08Penp6MDExAVVVsbW1BZ7n0djYiL6+PiwuLuLKlSuwWCwAgPHxcaytrQEA3G43BgYGcPXqVTAMg0AggJs3byKdTuPt27cIBALo7OzEu3fv4HK5UF5ejkOHDqGlpQU8zwMABgcH4ff7AQAjIyM4d+4cBEGALMuoqqrC8PAwFhcX0d3dDUEQYDAYYLPZ4PF4wPM8OI7D6dOnMTQ0BL/fD6vVisbrRFhZWQHHcXj9+jWuXbuG58+fw+v16tehKAqqq6tx+fJlvHnzBoODgzCZTGBZFj6fD7W1tTh+/DhaW1vh8XjQ0dEBj8eDSCQCjuOwtraGoaEhnDp1Ci0tLWA4jsPp06exsrKCT58+YXZ2FiaTCTU1Nbhy5Qo2NzdRW1uL2dlZjI6O4ujRo+A4DtFoFJOTk3jy5Am8Xi8AoKqqChcvXsSLFy9w4cIFOBwOsByHlpYWfPnyBTdu3ADLslAUBV6vF7W1teB5HhzHIRaL4dmzZ5ib+wGAgN/vR2NjIziOA8uysFqtCIfDcLvdAACr1YqqqipUVVWBYRhomoZYLIZwOAwAsNvtsNvtYFkWJpMJHMeB4zgYDAYIggCn0wlBEMAwLABAmqYhnU7D5/NBEAQwLMuCZVkYjUb9P4FgMAiLxQKGZVmwbPHhbDYLjuNgNBr1/wS73Q6TyQSGZVmwbPHhbDYLjuNgNBr1/wS73Q6TyfSH/ycAAGBZFkajEXsMG4ZhQH9dQgkllFBCCf8UP2f2B3SJMjf+AAAAAElFTkSuQmCC" class="logo-img" alt="Trubbish">
+<div class="logo-text">
+<span class="logo-top">TRUBBISH BIN</span>
+<span class="logo-bot">OP <span>CARDDASS</span></span>
+</div>
+</a>
+
+<div class="search-wrap">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+<input type="text" id="searchInput" placeholder="Search cards…">
+</div>
+
+<div class="tabs">
+<button class="tab active" data-tab="all">All</button>
+<button class="tab" data-tab="owned">Owned</button>
+<button class="tab" data-tab="missing">Missing</button>
+</div>
+
+<div class="hdr-right">
+<span class="sync-label"><span class="sync-dot saved"></span><span id="syncLabel">Synced</span></span>
+<div class="stat-badge"><strong id="ownedCount">0</strong> / <span id="totalCount">330</span></div>
+<button class="hdr-btn export" id="exportBtn">Export TSV</button>
+<button class="hdr-btn" id="importBtn">Import TSV</button>
+<button class="hdr-btn sort-inactive" id="sortMissingBtn">Sort by Missing</button>
+<button class="hdr-btn danger" id="resetBtn">Reset</button>
+<button class="hdr-btn" id="signOutBtn">Sign Out</button>
+</div>
+</header>
+
+<div class="gaps-panel" id="gapsPanel"></div>
+<div class="main" id="main"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".tsv,.txt" style="display:none">
+
+</div>
+
+<script src="https://accounts.google.com/gsi/client"></script>
+<script>
+const CLIENT_ID='406228714733-s5jaq0bp4nl7uujdc35j51l8nj0cgagt.apps.googleusercontent.com';
+const SCOPES='https://www.googleapis.com/auth/drive.file';
+const FOLDER_ID='1Mf5sWIjDszg5UMgikmExaVWeeufCFVWB'; // SuperLuckyKat folder
+const FILE_NAME='op-carddass-tracker.json';
+const IMG_BASE='https://grandlinewiki.net/images/tcg/hyperbattle/cards/';
+
+let tokenClient,accessToken,driveFileId,data={},saveTimer;
+let activeTab='all',searchTerm='',sortByMissing=false,excludedSets={};
+
+// Card data: First 7 sets (First Stage through 5th Stage)
+const SETS=[
+  {key:'FIRST',title:'First Stage',sub:'Nov 1999',cards:[
+    {id:'C01',nm:'Luffy',r:'h'},
+    {id:'C02',nm:'Luffy',r:'h'},
+    {id:'C03',nm:'Luffy'},
+    {id:'C04',nm:'Luffy'},
+    {id:'C05',nm:'Luffy\'s Hat'},
+    {id:'C06',nm:'Zoro',r:'h'},
+    {id:'C07',nm:'Zoro',r:'h'},
+    {id:'C08',nm:'Zoro'},
+    {id:'C09',nm:'Nami'},
+    {id:'C10',nm:'Nami'},
+    {id:'C11',nm:'Nami'},
+    {id:'C12',nm:'Usopp'},
+    {id:'C13',nm:'Usopp'},
+    {id:'C14',nm:'Shanks'},
+    {id:'C15',nm:'Beckmann'},
+    {id:'C16',nm:'Kuina'},
+    {id:'C17',nm:'Koby'},
+    {id:'C18',nm:'Rika'},
+    {id:'C19',nm:'Boodle'},
+    {id:'C20',nm:'Chou-chou'},
+    {id:'C21',nm:'Alvida'},
+    {id:'C22',nm:'Morgan'},
+    {id:'C23',nm:'Helmeppo'},
+    {id:'C24',nm:'Buggy'},
+    {id:'C25',nm:'Buggy'},
+    {id:'C26',nm:'Buggy Cannon'},
+    {id:'C27',nm:'Mohji'},
+    {id:'C28',nm:'Richie'},
+    {id:'C29',nm:'Cabaji'},
+    {id:'C30',nm:'Lord of the Coast'},
+    {id:'C31',nm:'Alvida Crew'},
+    {id:'C32',nm:'Morgan Troops'},
+    {id:'C33',nm:'Buggy Crew'},
+    {id:'C34',nm:'Red Hair Pirates'},
+    {id:'S01',nm:'Luffy Pirates',r:'h'},
+    {id:'S02',nm:'Luffy',r:'h'},
+    {id:'S03',nm:'Gomu Gomu no Mi',r:'h'},
+    {id:'S04',nm:'Zoro',r:'h'},
+    {id:'S05',nm:'Nami',r:'h'},
+    {id:'S06',nm:'Shanks',r:'h'},
+    {id:'S07',nm:'Morgan'},
+    {id:'S08',nm:'Buggy'},
+  ]},
+  {key:'SECOND',title:'2nd Stage',sub:'Jan 2000',cards:[
+    {id:'C35',nm:'Luffy',r:'h'},
+    {id:'C36',nm:'Luffy',r:'h'},
+    {id:'C37',nm:'Luffy',r:'h'},
+    {id:'C38',nm:'Zoro',r:'h'},
+    {id:'C39',nm:'Zoro',r:'h'},
+    {id:'C40',nm:'Zoro'},
+    {id:'C41',nm:'Nami'},
+    {id:'C42',nm:'Nami'},
+    {id:'C43',nm:'Nami'},
+    {id:'C44',nm:'Usopp'},
+    {id:'C45',nm:'Usopp'},
+    {id:'C46',nm:'Usopp\'s Weapon'},
+    {id:'C47',nm:'Chou-chou'},
+    {id:'C48',nm:'Yasopp'},
+    {id:'C49',nm:'Kaya'},
+    {id:'C50',nm:'Merry'},
+    {id:'C51',nm:'Kurahadol'},
+    {id:'C52',nm:'Tamanegi'},
+    {id:'C53',nm:'Piiman'},
+    {id:'C54',nm:'Ninjin'},
+    {id:'C55',nm:'Buggy'},
+    {id:'C56',nm:'Buggy'},
+    {id:'C57',nm:'Mohji & Richie'},
+    {id:'C58',nm:'Cabaji'},
+    {id:'C59',nm:'Buggy\'s 3 Underlings'},
+    {id:'C60',nm:'Kuro'},
+    {id:'C61',nm:'Kuro'},
+    {id:'C62',nm:'Jango'},
+    {id:'C63',nm:'Jango\'s Weapon'},
+    {id:'C64',nm:'Sham'},
+    {id:'C65',nm:'Buchi'},
+    {id:'C66',nm:'Black Cat Pirates'},
+    {id:'S09',nm:'Luffy Pirates',r:'h'},
+    {id:'S10',nm:'Luffy',r:'h'},
+    {id:'S11',nm:'Zoro',r:'h'},
+    {id:'S12',nm:'Usopp',r:'h'},
+    {id:'S13',nm:'Sanji',r:'h'},
+    {id:'S14',nm:'Buggy',r:'h'},
+    {id:'S15',nm:'Kuro'},
+    {id:'S16',nm:'Jango'},
+    {id:'FP1',nm:'Large Maelstrom'},
+    {id:'FP2',nm:'Buggy Pirates'},
+  ]},
+  {key:'GB1',title:'Grand Box',sub:'Mar 2000',cards:[
+    {id:'C67',nm:'Red Hair Pirates'},
+    {id:'C68',nm:'Usopp Pirates'},
+    {id:'C69',nm:'Luffy',r:'h'},
+    {id:'C70',nm:'Luffy',r:'h'},
+    {id:'C71',nm:'Luffy\'s Hat'},
+    {id:'C72',nm:'Zoro'},
+    {id:'C73',nm:'Zoro'},
+    {id:'C74',nm:'Zoro'},
+    {id:'C75',nm:'Nami'},
+    {id:'C76',nm:'Nami'},
+    {id:'C77',nm:'Nami\'s Weapon'},
+    {id:'C78',nm:'Usopp'},
+    {id:'C79',nm:'Usopp'},
+    {id:'C80',nm:'Sanji'},
+    {id:'C81',nm:'Sanji'},
+    {id:'C82',nm:'Shanks',r:'g'},
+    {id:'C83',nm:'Shanks'},
+    {id:'C84',nm:'Beckmann'},
+    {id:'C85',nm:'Lucky Roux'},
+    {id:'C86',nm:'Yasopp'},
+    {id:'C87',nm:'Makino'},
+    {id:'C88',nm:'Koby'},
+    {id:'C89',nm:'Rika'},
+    {id:'C90',nm:'Kuina'},
+    {id:'C91',nm:'Boodle'},
+    {id:'C92',nm:'ChuChu'},
+    {id:'C93',nm:'Kaya'},
+    {id:'C94',nm:'Kurohadol'},
+    {id:'C95',nm:'Alvida'},
+    {id:'C96',nm:'Morgan'},
+    {id:'C97',nm:'Helmeppo'},
+    {id:'C98',nm:'Buggy',r:'g'},
+    {id:'C99',nm:'Buggy'},
+    {id:'C100',nm:'Cabaji'},
+    {id:'C101',nm:'Cabaji'},
+    {id:'C102',nm:'Mohji & Richie'},
+    {id:'C103',nm:'Kuro\'s Weapon'},
+    {id:'C104',nm:'Jango'},
+    {id:'C105',nm:'Buchi'},
+    {id:'C106',nm:'Sham'},
+    {id:'C107',nm:'Krieg',r:'g'},
+    {id:'C108',nm:'Krieg'},
+    {id:'C109',nm:'Buggy Crew'},
+    {id:'C110',nm:'Black Cat Pirates'},
+    {id:'S17',nm:'Luffy Pirates',r:'h'},
+    {id:'S18',nm:'Luffy',r:'h'},
+    {id:'S19',nm:'Zoro',r:'h'},
+    {id:'S20',nm:'Nami'},
+    {id:'S21',nm:'Usopp'},
+    {id:'S22',nm:'Shanks'},
+    {id:'S23',nm:'Alvida'},
+    {id:'S24',nm:'Morgan'},
+    {id:'S25',nm:'Buggy'},
+    {id:'S26',nm:'Kuro'},
+    {id:'FP3',nm:'Usopp\'s Village'},
+    {id:'FP4',nm:'Makino\'s Bar'},
+    {id:'FP5',nm:'Drinking Pub'},
+    {id:'FP6',nm:'Jango\'s Pirates'},
+    {id:'FP7',nm:'Going Merry'},
+    {id:'FP8',nm:'Baratie is Open for Business'},
+  ]},
+  {key:'THIRD',title:'3rd Stage',sub:'Apr 2000',cards:[
+    {id:'C111',nm:'Luffy'},
+    {id:'C112',nm:'Luffy',r:'h'},
+    {id:'C113',nm:'Luffy',r:'h'},
+    {id:'C114',nm:'Zoro',r:'h'},
+    {id:'C115',nm:'Zoro',r:'h'},
+    {id:'C116',nm:'Nami'},
+    {id:'C117',nm:'Nami'},
+    {id:'C118',nm:'Usopp'},
+    {id:'C119',nm:'Usopp'},
+    {id:'C120',nm:'Sanji'},
+    {id:'C121',nm:'Sanji'},
+    {id:'C122',nm:'Shanks'},
+    {id:'C123',nm:'Shanks'},
+    {id:'C124',nm:'Kaya'},
+    {id:'C125',nm:'Gaimon'},
+    {id:'C126',nm:'Zeff'},
+    {id:'C127',nm:'Yosaku'},
+    {id:'C128',nm:'Johnny'},
+    {id:'C129',nm:'Ganzo'},
+    {id:'C130',nm:'Ganzo'},
+    {id:'C131',nm:'Tobio'},
+    {id:'C132',nm:'Woonan'},
+    {id:'C133',nm:'Woonan'},
+    {id:'C134',nm:'Kuro'},
+    {id:'C135',nm:'Jango'},
+    {id:'C136',nm:'Jango'},
+    {id:'C137',nm:'Krieg'},
+    {id:'C138',nm:'Gin'},
+    {id:'C139',nm:'El Drago'},
+    {id:'C140',nm:'Golass'},
+    {id:'C141',nm:'Luffy Pirates'},
+    {id:'C142',nm:'Usopp Pirates'},
+    {id:'C143',nm:'Krieg Plunder Force'},
+    {id:'C144',nm:'Eldraggo\'s 3 Men'},
+    {id:'S27',nm:'Luffy',r:'h'},
+    {id:'S28',nm:'Usopp',r:'h'},
+    {id:'S29',nm:'Sanji',r:'h'},
+    {id:'S30',nm:'Kurohadol',r:'h'},
+    {id:'S31',nm:'Krieg',r:'h'},
+    {id:'S32',nm:'Eldraggo',r:'h'},
+    {id:'FP09',nm:'Krieg Grand Fleet'},
+    {id:'FP10',nm:'Baratie Cooking'},
+  ]},
+  {key:'FOURTH',title:'4th Stage',sub:'Jun 2000',cards:[
+    {id:'C145',nm:'Luffy',r:'h'},
+    {id:'C146',nm:'Luffy'},
+    {id:'C147',nm:'Meat On The Bone'},
+    {id:'C148',nm:'Zoro',r:'h'},
+    {id:'C149',nm:'Zoro'},
+    {id:'C150',nm:'Wado Ichimonji'},
+    {id:'C151',nm:'Nami',r:'h'},
+    {id:'C152',nm:'Nami',r:'h'},
+    {id:'C153',nm:'Usopp'},
+    {id:'C154',nm:'Usopp'},
+    {id:'C155',nm:'Sanji'},
+    {id:'C156',nm:'Sanji'},
+    {id:'C157',nm:'Sanji'},
+    {id:'C158',nm:'Kuina'},
+    {id:'C159',nm:'Gaimon'},
+    {id:'C160',nm:'Zeff'},
+    {id:'C161',nm:'Zeff'},
+    {id:'C162',nm:'Patty'},
+    {id:'C163',nm:'Carne'},
+    {id:'C164',nm:'Yosaku'},
+    {id:'C165',nm:'Johnny'},
+    {id:'C166',nm:'Nojiko'},
+    {id:'C167',nm:'Bell-mère'},
+    {id:'C168',nm:'Genzo'},
+    {id:'C169',nm:'Fullbody'},
+    {id:'C170',nm:'Mihawk'},
+    {id:'C171',nm:'Mihawk\'s Sword'},
+    {id:'C172',nm:'Krieg'},
+    {id:'C173',nm:'Krieg\'s Weapon'},
+    {id:'C174',nm:'Gin'},
+    {id:'C175',nm:'Pearl'},
+    {id:'C176',nm:'Arlong'},
+    {id:'C177',nm:'Fighting Cooks'},
+    {id:'S33',nm:'Luffy'},
+    {id:'S34',nm:'Zoro',r:'h'},
+    {id:'S35',nm:'Nami',r:'h'},
+    {id:'S36',nm:'Krieg',r:'h'},
+    {id:'S37',nm:'Gin',r:'h'},
+    {id:'S38',nm:'Arlong',r:'h'},
+    {id:'S39',nm:'Luffy Vs. Arlong',r:'h'},
+    {id:'FP11',nm:'Baratie in Battle'},
+    {id:'FP12',nm:'Krieg\'s Sunken Ship'},
+  ]},
+  {key:'GB2',title:'Grand Box 2',sub:'Jul 2000',cards:[
+    {id:'C178',nm:'Luffy'},
+    {id:'C179',nm:'Luffy'},
+    {id:'C180',nm:'Zoro'},
+    {id:'C181',nm:'Zoro'},
+    {id:'C182',nm:'Nami'},
+    {id:'C183',nm:'Nami'},
+    {id:'C184',nm:'Nami'},
+    {id:'C185',nm:'Usopp'},
+    {id:'C186',nm:'Usopp'},
+    {id:'C187',nm:'Sanji'},
+    {id:'C188',nm:'Sanji'},
+    {id:'C189',nm:'Kaya'},
+    {id:'C190',nm:'Gaimon'},
+    {id:'C191',nm:'Zeff'},
+    {id:'C192',nm:'Patty'},
+    {id:'C193',nm:'Carne'},
+    {id:'C194',nm:'Chef\'s Knife'},
+    {id:'C195',nm:'Sabagashira 1'},
+    {id:'C196',nm:'Yosaku'},
+    {id:'C197',nm:'Johnny'},
+    {id:'C198',nm:'Nojiko'},
+    {id:'C199',nm:'Bell-mère'},
+    {id:'C200',nm:'Bell-mère and Children'},
+    {id:'C201',nm:'Cocoyasi Townspeople'},
+    {id:'C202',nm:'Fullbody'},
+    {id:'C203',nm:'Smoker',r:'g'},
+    {id:'C204',nm:'Tashigi'},
+    {id:'C205',nm:'Kuro'},
+    {id:'C206',nm:'Jango'},
+    {id:'C207',nm:'Krieg'},
+    {id:'C208',nm:'Krieg'},
+    {id:'C209',nm:'Gin'},
+    {id:'C210',nm:'Gin'},
+    {id:'C211',nm:'Pearl'},
+    {id:'C212',nm:'Arlong',r:'g'},
+    {id:'C213',nm:'Arlong\'s Weapon'},
+    {id:'C214',nm:'Hatchan'},
+    {id:'C215',nm:'Kuroobi'},
+    {id:'C216',nm:'Chew'},
+    {id:'C217',nm:'Momoo'},
+    {id:'C218',nm:'Black Cat Pirates'},
+    {id:'C219',nm:'Krieg Assault Force'},
+    {id:'C220',nm:'Arlong Crew'},
+    {id:'S40',nm:'Luffy Pirates',r:'h'},
+    {id:'S41',nm:'Luffy',r:'g'},
+    {id:'S42',nm:'Zoro',r:'h'},
+    {id:'S43',nm:'Nami'},
+    {id:'S44',nm:'Usopp'},
+    {id:'S45',nm:'Sanji'},
+    {id:'S46',nm:'Zeff'},
+    {id:'S47',nm:'Mihawk'},
+    {id:'S48',nm:'Kuro'},
+    {id:'S49',nm:'Krieg'},
+    {id:'S50',nm:'Arlong',r:'h'},
+    {id:'FP13',nm:'Decisive Battle on the Slope'},
+    {id:'FP14',nm:'Krieg\'s Giant Galley'},
+    {id:'FP15',nm:'Baratie Customer Service'},
+    {id:'FP16',nm:'Arlong Park'},
+    {id:'FP17',nm:'Cocoyasi Village'},
+    {id:'FP18',nm:'Voyage of the Going Merry'},
+  ]},
+  {key:'FIFTH',title:'5th Stage',sub:'Aug 2000',cards:[
+    {id:'C221',nm:'Luffy',r:'h'},
+    {id:'C222',nm:'Luffy'},
+    {id:'C223',nm:'Luffy',r:'h'},
+    {id:'C224',nm:'Fishman Nami',r:'h'},
+    {id:'C225',nm:'Zoro',r:'h'},
+    {id:'C226',nm:'Zoro',r:'h'},
+    {id:'C227',nm:'Yubashiri'},
+    {id:'C228',nm:'Sandai Kitetsu'},
+    {id:'C229',nm:'Nami'},
+    {id:'C230',nm:'Nami'},
+    {id:'C231',nm:'Nami'},
+    {id:'C232',nm:'Usopp'},
+    {id:'C233',nm:'Usopp'},
+    {id:'C234',nm:'Sanji'},
+    {id:'C235',nm:'Sanji'},
+    {id:'C236',nm:'Sanji'},
+    {id:'C237',nm:'Yosaku'},
+    {id:'C238',nm:'Johnny'},
+    {id:'C239',nm:'Genzo'},
+    {id:'C240',nm:'Nojiko'},
+    {id:'C241',nm:'Bell-mère'},
+    {id:'C242',nm:'Ipponmatsu'},
+    {id:'C243',nm:'Nezumi'},
+    {id:'C244',nm:'Tashigi'},
+    {id:'C245',nm:'Shikure'},
+    {id:'C246',nm:'Arlong'},
+    {id:'C247',nm:'Arlong'},
+    {id:'C248',nm:'Hatchan'},
+    {id:'C249',nm:'Kuroobi'},
+    {id:'C250',nm:'Chew'},
+    {id:'C251',nm:'Momoo'},
+    {id:'C252',nm:'Buggy'},
+    {id:'C253',nm:'Arlong\'s Crew'},
+    {id:'C254',nm:'Buggy\'s Crew'},
+    {id:'S51',nm:'Luffy',r:'h'},
+    {id:'S52',nm:'Zoro',r:'h'},
+    {id:'S53',nm:'Shanks',r:'h'},
+    {id:'S54',nm:'Smoker',r:'h'},
+    {id:'S55',nm:'Arlong',r:'h'},
+    {id:'S56',nm:'Alvida',r:'h'},
+    {id:'FP19',nm:'Nami\'s Survey Room'},
+    {id:'FP20',nm:'Loguetown'},
+  ]},
+];
+
+const DRIVE='https://www.googleapis.com/drive/v3';
+const UPLOAD='https://www.googleapis.com/upload/drive/v3';
+
+function authHeaders(){
+  return {Authorization:'Bearer '+accessToken,'Content-Type':'application/json'};
+}
+
+async function driveGet(path,params={}){
+  const url=new URL(DRIVE+path);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  const r=await fetch(url,{headers:{Authorization:'Bearer '+accessToken}});
+  if(!r.ok)throw new Error('Drive GET '+path+' failed: '+r.status);
+  return r;
+}
+
+async function findOrCreateFile(){
+  const r=await driveGet('/files',{
+    q:`name='${FILE_NAME}' and '${FOLDER_ID}' in parents and trashed=false`,
+    fields:'files(id,name,modifiedTime)',
+    orderBy:'modifiedTime desc',
+    spaces:'drive'
+  });
+  const json=await r.json();
+  const files=json.files||[];
+  if(files.length>0){
+    driveFileId=files[0].id;
+    for(let i=1;i<files.length;i++){
+      try{await fetch(DRIVE+'/files/'+files[i].id,{method:'DELETE',headers:{Authorization:'Bearer '+accessToken}});}catch(e){}
+    }
+    return driveFileId;
+  }
+  const boundary='slk_boundary_'+Date.now();
+  const meta=JSON.stringify({name:FILE_NAME,parents:[FOLDER_ID]});
+  const body=`--${boundary}
+Content-Type: application/json; charset=UTF-8
+
+${meta}
+--${boundary}
+Content-Type: application/json
+
+{}
+--${boundary}--`;
+  const cr=await fetch(UPLOAD+'/files?uploadType=multipart',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+accessToken,'Content-Type':`multipart/related; boundary=${boundary}`},
+    body
+  });
+  if(!cr.ok)throw new Error('Create file failed: '+cr.status);
+  const created=await cr.json();
+  driveFileId=created.id;
+  return driveFileId;
+}
+
+async function loadFromDrive(){
+  setSyncState('syncing','Loading…');
+  try{
+    await findOrCreateFile();
+    const r=await fetch(DRIVE+'/files/'+driveFileId+'?alt=media',{
+      headers:{Authorization:'Bearer '+accessToken}
+    });
+    if(!r.ok)throw new Error('Read failed: '+r.status);
+    const text=(await r.text()).trim();
+    if(text&&text!=='{}'){
+      let parsed;
+      try{
+        parsed=JSON.parse(text);
+      }catch(e){
+        try{
+          parsed=JSON.parse(atob(text));
+          data=parsed;
+          await saveToDrive();
+        }catch(e2){
+          console.error('Could not parse file content:',e2);
+          parsed={};
+        }
+      }
+      data=parsed||{};
+    }else{
+      data={};
+    }
+    setSyncState('saved','Synced');
+    render();
+    showApp();
+  }catch(e){
+    console.error('Drive load error',e);
+    setSyncState('error','Load failed: '+e.message);
+    data={};
+    render();
+    showApp();
+  }
+}
+
+async function saveToDrive(){
+  if(!driveFileId)return;
+  setSyncState('syncing','Saving…');
+  try{
+    await ensureFreshToken();
+    const r=await fetch(UPLOAD+'/files/'+driveFileId+'?uploadType=media',{
+      method:'PATCH',
+      headers:{Authorization:'Bearer '+accessToken,'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    if(r.status===401||r.status===403){
+      setSyncState('error','Session expired');
+      document.getElementById('syncLabel').style.cursor='pointer';
+      document.getElementById('syncLabel').title='Click to re-authenticate';
+      document.getElementById('syncLabel').onclick=()=>tokenClient.requestAccessToken({prompt:''});
+      return;
+    }
+    if(!r.ok)throw new Error('Save failed: '+r.status);
+    document.getElementById('syncLabel').style.cursor='';
+    document.getElementById('syncLabel').onclick=null;
+    setSyncState('saved','Saved ✓');
+    setTimeout(()=>setSyncState('saved','Synced'),1500);
+  }catch(e){
+    console.error('Drive save error',e);
+    setSyncState('error','Save failed — click to retry');
+    document.getElementById('syncLabel').style.cursor='pointer';
+    document.getElementById('syncLabel').onclick=()=>{
+      document.getElementById('syncLabel').onclick=null;
+      saveToDrive();
+    };
+  }
+}
+
+function scheduleSave(){
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveToDrive,1200);
+}
+
+let tokenExpiry=0;
+
+function refreshToken(){
+  return new Promise((resolve,reject)=>{
+    tokenClient.callback=async(resp)=>{
+      if(resp.error){reject(new Error(resp.error));return;}
+      accessToken=resp.access_token;
+      tokenExpiry=Date.now()+(resp.expires_in||3500)*1000;
+      resolve();
+    };
+    tokenClient.requestAccessToken({prompt:''});
+  });
+}
+
+async function ensureFreshToken(){
+  if(!accessToken||Date.now()>tokenExpiry-120000){
+    try{await refreshToken();}
+    catch(e){
+      console.warn('Token refresh failed:',e);
+    }
+  }
+}
+
+function initAuth(){
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CLIENT_ID,
+    scope:SCOPES,
+    callback:async(resp)=>{
+      if(resp.error){
+        document.getElementById('authError').textContent='Sign in failed: '+resp.error;
+        document.getElementById('authError').style.display='block';
+        return;
+      }
+      accessToken=resp.access_token;
+      tokenExpiry=Date.now()+(resp.expires_in||3500)*1000;
+      await loadFromDrive();
+    }
+  });
+}
+
+document.getElementById('signInBtn').addEventListener('click',()=>{
+  if(!tokenClient){
+    document.getElementById('authError').textContent='Google API not loaded yet. Please wait a moment and try again.';
+    document.getElementById('authError').style.display='block';
+    return;
+  }
+  tokenClient.requestAccessToken({prompt:'select_account'});
+});
+
+document.getElementById('signOutBtn').addEventListener('click',()=>{
+  if(accessToken){google.accounts.oauth2.revoke(accessToken,()=>{});}
+  accessToken=null;driveFileId=null;data={};
+  document.getElementById('app').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
+});
+
+function showApp(){
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+}
+
+setTimeout(()=>{if(typeof google!=='undefined'&&google.accounts)initAuth();},500);
+
+function setSyncState(state,label){
+  const dot=document.querySelector('.sync-dot');
+  const lbl=document.getElementById('syncLabel');
+  dot.className='sync-dot '+state;
+  lbl.textContent=label;
+}
+
+function render(){
+  let allCards=[];
+  SETS.forEach(s=>{
+    s.cards.forEach(c=>{
+      allCards.push({...c,set:s.key,setTitle:s.title});
+    });
+  });
+
+  let filtered=allCards;
+  if(activeTab==='owned')filtered=filtered.filter(c=>data[c.id]);
+  if(activeTab==='missing')filtered=filtered.filter(c=>!data[c.id]);
+  if(searchTerm){
+    const q=searchTerm.toLowerCase();
+    filtered=filtered.filter(c=>c.id.toLowerCase().includes(q)||c.nm.toLowerCase().includes(q));
+  }
+
+  let sortedSets=SETS.slice();
+  if(sortByMissing){
+    sortedSets.sort((a,b)=>{
+      const aMiss=a.cards.filter(c=>!data[c.id]).length;
+      const bMiss=b.cards.filter(c=>!data[c.id]).length;
+      if(aMiss===0&&bMiss>0)return 1;
+      if(bMiss===0&&aMiss>0)return -1;
+      return bMiss-aMiss;
+    });
+  }
+
+  const main=document.getElementById('main');
+  main.innerHTML='';
+
+  sortedSets.forEach(s=>{
+    const setCards=filtered.filter(c=>c.set===s.key);
+    if(setCards.length===0&&activeTab!=='all')return;
+
+    const owned=s.cards.filter(c=>data[c.id]).length;
+    const total=s.cards.length;
+    const pct=total>0?Math.round((owned/total)*100):0;
+    const isExcluded=excludedSets[s.key];
+
+    const group=document.createElement('div');
+    group.className='set-group'+(isExcluded?' excluded':'');
+
+    const hdr=document.createElement('div');
+    hdr.className='set-header';
+    hdr.innerHTML=`
+<div>
+<div class="set-title">${s.title}</div>
+<div class="set-sub">${s.sub} • ${total} cards</div>
+</div>
+<div class="set-progress">
+<div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+<div class="progress-pct">${owned}/${total} (${pct}%)</div>
+</div>
+<button class="st-toggle ${isExcluded?'excluded':'included'}">${isExcluded?'EXCL':'INCL'}</button>
+`;
+
+    hdr.querySelector('.st-toggle').onclick=()=>{
+      if(excludedSets[s.key])delete excludedSets[s.key];
+      else excludedSets[s.key]=true;
+      render();
+    };
+
+    const grid=document.createElement('div');
+    grid.className='card-grid';
+
+    setCards.forEach(c=>{
+      const d=data[c.id]||{};
+      const isOwned=!!d.qty;
+      const card=document.createElement('div');
+      card.className='card'+(isOwned?' owned':'');
+      const rarity=c.r==='h'?'holo':c.r==='g'?'gold':'regular';
+      const rarityLabel=c.r==='h'?'Holo':c.r==='g'?'Gold':'Regular';
+
+      card.innerHTML=`
+<div class="card-img-wrap">
+<img src="${IMG_BASE}${c.id.toLowerCase()}.png" alt="${c.nm}" onload="this.classList.remove('loading')" class="loading">
+<div class="img-ph"><div class="img-ph-id">${c.id}</div></div>
+<div class="owned-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+</div>
+<div class="card-body">
+<div class="card-meta">
+<span class="card-id">${c.id}</span>
+<span class="rarity-tag ${rarity}">${rarityLabel}</span>
+</div>
+<div class="card-name">${c.nm}</div>
+<div class="card-detail">
+<div class="qty-row">
+<span class="qty-label">Qty</span>
+<div class="qty-ctrl">
+<button class="qty-btn" data-id="${c.id}" data-op="dec">−</button>
+<span class="qty-val">${d.qty||1}</span>
+<button class="qty-btn" data-id="${c.id}" data-op="inc">+</button>
+</div>
+</div>
+<div class="cond-pills">
+${['NM','LP','MP','HP','D'].map(cnd=>`<span class="pill${(d.cond||[]).includes(cnd)?' on':''}" data-id="${c.id}" data-cond="${cnd}">${cnd}</span>`).join('')}
+</div>
+<button class="remove-btn" data-id="${c.id}">Remove</button>
+</div>
+</div>
+`;
+
+      if(!isOwned){
+        card.onclick=()=>{
+          if(!data[c.id])data[c.id]={qty:1,cond:['NM']};
+          scheduleSave();
+          render();
+        };
+      }
+
+      grid.appendChild(card);
+    });
+
+    group.appendChild(hdr);
+    group.appendChild(grid);
+    main.appendChild(group);
+  });
+
+  document.querySelectorAll('.qty-btn').forEach(btn=>{
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      const id=btn.dataset.id;
+      const op=btn.dataset.op;
+      if(!data[id])data[id]={qty:1,cond:['NM']};
+      if(op==='inc')data[id].qty=(data[id].qty||1)+1;
+      else if(op==='dec')data[id].qty=Math.max(1,(data[id].qty||1)-1);
+      scheduleSave();
+      render();
+    };
+  });
+
+  document.querySelectorAll('.pill').forEach(pill=>{
+    pill.onclick=(e)=>{
+      e.stopPropagation();
+      const id=pill.dataset.id;
+      const cnd=pill.dataset.cond;
+      if(!data[id])data[id]={qty:1,cond:[]};
+      if(!data[id].cond)data[id].cond=[];
+      const idx=data[id].cond.indexOf(cnd);
+      if(idx>-1)data[id].cond.splice(idx,1);
+      else data[id].cond.push(cnd);
+      scheduleSave();
+      render();
+    };
+  });
+
+  document.querySelectorAll('.remove-btn').forEach(btn=>{
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      const id=btn.dataset.id;
+      delete data[id];
+      scheduleSave();
+      render();
+    };
+  });
+
+  updateStats();
+  updateGaps();
+}
+
+function updateStats(){
+  let totalCards=0;
+  let ownedCards=0;
+  SETS.forEach(s=>{
+    if(excludedSets[s.key])return;
+    s.cards.forEach(c=>{
+      totalCards++;
+      if(data[c.id])ownedCards++;
+    });
+  });
+  document.getElementById('totalCount').textContent=totalCards;
+  document.getElementById('ownedCount').textContent=ownedCards;
+}
+
+function updateGaps(){
+  const panel=document.getElementById('gapsPanel');
+  const gaps=[];
+  SETS.forEach(s=>{
+    if(excludedSets[s.key])return;
+    const missing=s.cards.filter(c=>!data[c.id]).length;
+    if(missing>0)gaps.push({set:s.key,title:s.title,count:missing});
+  });
+  if(gaps.length===0){
+    panel.innerHTML='<span class="gaps-panel-label">🎉 Collection Complete!</span>';
+    return;
+  }
+  panel.innerHTML='<span class="gaps-panel-label">Missing:</span>'+gaps.map(g=>
+    `<a href="#${g.set}" class="gap-chip"><span class="gap-label">${g.title}</span> <span class="gap-count">${g.count}</span></a>`
+  ).join('');
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab=tab.dataset.tab;
+    render();
+  };
+});
+
+document.getElementById('searchInput').oninput=(e)=>{
+  searchTerm=e.target.value;
+  render();
+};
+
+document.getElementById('sortMissingBtn').onclick=()=>{
+  sortByMissing=!sortByMissing;
+  const btn=document.getElementById('sortMissingBtn');
+  btn.classList.toggle('sort-active',sortByMissing);
+  render();
+};
+
+document.getElementById('exportBtn').onclick=()=>{
+  const rows=[['Card ID','Card Name','Set','Rarity','Qty','Condition','Notes'].join('\t')];
+  SETS.forEach(s=>{
+    s.cards.forEach(c=>{
+      const d=data[c.id];
+      if(!d)return;
+      const rarity=c.r==='h'?'Holo':c.r==='g'?'Gold':'Regular';
+      rows.push([c.id,c.nm,s.title,rarity,d.qty||1,(d.cond||[]).join(','),d.notes||''].join('\t'));
+    });
+  });
+  const blob=new Blob([rows.join('\n')],{type:'text/tab-separated-values'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='carddass-collection-'+new Date().toISOString().slice(0,10)+'.tsv';
+  a.click();
+  showToast('Exported to TSV');
+};
+
+document.getElementById('importBtn').onclick=()=>{
+  document.getElementById('importFile').click();
+};
+
+document.getElementById('importFile').onchange=(e)=>{
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const text=ev.target.result;
+    const lines=text.split('\n').slice(1);
+    lines.forEach(line=>{
+      const parts=line.split('\t');
+      if(parts.length<4)return;
+      const id=parts[0].trim();
+      const qty=parseInt(parts[4])||1;
+      const cond=parts[5]?parts[5].split(',').map(c=>c.trim()).filter(c=>c):['NM'];
+      const notes=parts[6]||'';
+      data[id]={qty,cond,notes};
+    });
+    scheduleSave();
+    render();
+    showToast('Import complete');
+  };
+  reader.readAsText(file);
+};
+
+document.getElementById('resetBtn').onclick=()=>{
+  if(!confirm('Reset all collection data? This cannot be undone.'))return;
+  data={};
+  excludedSets={};
+  scheduleSave();
+  render();
+  showToast('Collection reset');
+};
+
+function showToast(msg){
+  const toast=document.getElementById('toast');
+  toast.textContent=msg;
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),2000);
+}
+
+document.querySelector('.logo-wrap').onclick=()=>{
+  window.location.href='https://metaprinter.github.io/trubbish-bin/';
+};
+
+render();
+</script>
+</body>
+</html>
